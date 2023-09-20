@@ -1,0 +1,8 @@
+traverses (.shp, vector shapefile) = data collected by campaign participants 
+rasters (.tif, geotiff) = heat surface models
+
+am = morning; af = afternoon; pm = evening
+t = temperature; hi = heat index
+f = fahrenheit 
+e.g. pm_hi_f.tif = evening heat index geotiff raster with fahrenheit values. 
+
