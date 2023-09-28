@@ -1,0 +1,327 @@
+---
+title: "Map Testing & Report Planning - Evening Temps Only"
+author: "Lee LeBoeuf, Beth Mitchell"
+date: '2023-09-28'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(leaflet)
+library(tidyverse)
+library(leafem)
+library(sf)
+library(psych)
+library(plotly)
+library(beeswarm)
+library(ggpubr)
+
+# reading in the data
+
+dat <- readRDS("Data/cvillheat_blocks.RDS")
+dat <- st_transform(dat, crs = 4326)
+
+temp_am <- dat %>% 
+  select(am_t_f) %>% 
+  mutate(temp = am_t_f) %>% 
+  select(temp) %>% 
+  st_drop_geometry()
+
+temp_af <- dat %>% 
+  select(af_t_f) %>% 
+  mutate(temp = af_t_f) %>% 
+  select(temp) %>% 
+  st_drop_geometry()
+
+temp_pm <- dat %>% 
+  select(pm_t_f) %>% 
+  mutate(temp = pm_t_f) %>% 
+  select(temp) %>% 
+  st_drop_geometry()
+
+temp_range <- temp_am %>% 
+  rbind(temp_af) %>% 
+  rbind(temp_pm)
+
+temp_select <- temp_pm$temp
+
+pal <- colorNumeric("Spectral", domain = temp_select, reverse = T)
+pal_rev <- colorNumeric("Spectral", domain = temp_select, reverse = F)
+
+```
+
+As many scientists predicted, we are already experiencing the beginning effects of climate change. Already, we see evidence that these effects [disproportionality impact low-income countries](https://www.theguardian.com/global-development/2022/jan/14/worlds-poorest-bear-brunt-of-climate-crisis-10-underreported-emergencies) and low-income communities in the [United States](https://www.npr.org/2021/07/14/1015983700/extreme-heat-is-getting-worse-for-low-income-non-white-americans-a-new-study-sho). In urban areas in the United States, [rising temperatures are most felt by low-income families](https://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-mosthttps://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-most) who tend to be concentrated in residential areas with high amounts of concrete and low amounts of green space. 
+
+These temperature disparities will further exacerbate disparities in housing costs ([like air conditioning](https://journals.sagepub.com/doi/10.1177/0956247816655676)) and [health outcomes](https://www.epa.gov/heatislands/heat-island-impacts). 
+
+Below, we map temperature readings across the city along with demographic information to see which communities of people in Charlottesville will be most impacted by urban heat island effects. 
+
+### Daily Temperature Fluctuations 
+
+Obviously, outside temperatures are not consistent across an entire day. Urban heat islands form when heat gets trapped in concrete and other industrial material, so the gradual increases in temperature you would expect to see the longer the sun is out is amplified.
+
+The maps below temperature readings around the City of Charlottesville in the morning, afternoon, and evening from the same day. Seeing the progression of increasing temperatures throughout the day highlights how concrete-heavy areas trap heat while green spaces manage to regulate and cool the temperature. The larger disparities in the evening also coincide with the hours when families are more likely to be home and feel the differences--in the evening after work. 
+
+* Add emphasis that green spaces that were warm in the afternoon begin to cool by evening. 
+
+* Add explanation that we're looking at census maps. 
+
+#### Morning temperatures 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  addPolygons(data = dat,
+              fillColor = ~pal(dat$am_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal(dat$am_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Average temperature: ", round(dat$am_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", pal = pal_rev, values = temp_select, opacity = 0.7, labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
+
+```
+
+
+#### Afternoon temperatures 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+# pal <- colorNumeric("Spectral", domain = dat$af_t_f, reverse = T)
+
+leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  addPolygons(data = dat,
+              fillColor = ~pal(dat$af_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal(dat$af_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Average temperature: ", round(dat$af_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", pal = pal_rev, values = temp_select, opacity = 0.7, labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
+
+```
+
+
+#### Evening temperatures 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+# pal <- colorNumeric("Spectral", domain = dat$pm_t_f, reverse = T)
+
+leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  addPolygons(data = dat,
+              fillColor = ~pal(dat$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal(dat$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Average temperature: ", round(dat$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", pal = pal_rev, values = temp_select, opacity = 0.7, labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
+
+```
+
+
+### Filtered maps 
+
+These maps provide a nice global view of the city, but to make it easier to understand the impact on specific communities, below we show the same maps but only with blocks that meet a certain threshold of racial composition. In each map, we've filtered the data to only show census blocks whose percent population of each racial group is above average for all the blocks in the area. As a whole, roughly XX% of Charlottesville is White, XX% is Black, and XX% is Hispanic (with XX% belonging to other races). However, do to longstanding neighborhood segregation resulting from racial wealth/income disparities and other zoning policies, those populations are not evenly distributed around the city. In other words, although the city as a whole is XX% White, XX% Black, and XX% Hispanic, any given census block might be 10% White, 90% Black, and 20% Hispanic. So, we took the average percent of each race across all census blocks, and the maps below only show the blocks that fell above the average for each race.
+
+#### Black residents 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+filmap1 <- dat %>%
+  dplyr::filter(percBlack >= mean(percBlack, na.rm = T))
+
+leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  addPolygons(data = filmap1,
+              fillColor = ~pal(filmap1$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal(filmap1$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", filmap1$GEOID20, "<br>",
+                             "Average temperature: ", round(filmap1$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", pal = pal_rev, values = temp_select, opacity = 0.7, labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
+
+```
+
+#### Hispanic residents 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+filmap3 <- dat %>%
+  filter(percHisp >= mean(percHisp, na.rm = T))
+
+leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  addPolygons(data = filmap3,
+              fillColor = ~pal(filmap3$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal(filmap3$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", filmap3$GEOID20, "<br>",
+                             "Average temperature: ", round(filmap3$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", pal = pal_rev, values = temp_select, opacity = 0.7, labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
+
+```
+
+#### White residents 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+filmap2 <- dat %>%
+  filter(percWhite >= mean(percWhite, na.rm = T))
+
+leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  addPolygons(data = filmap2,
+              fillColor = ~pal(filmap2$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal(filmap2$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", filmap2$GEOID20, "<br>",
+                             "Average temperature: ", round(filmap2$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", pal = pal_rev, values = temp_select, opacity = 0.7, labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
+
+```
+
+
+### Beeswarm Plots 
+
+Another way of understanding these data is to look at the distribution or range of temperature readings in different groups of census blocks. Below, we've ranked each census block by the percent of residents in each racial group. The black lines in each group represent the average temperature for the group. 
+
+#### Percent Black
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+dat$bin_Black <- ntile(dat$percBlack, 3)
+
+dat <- dat %>%
+  group_by(bin_Black) %>%
+  mutate(meantempBlack = mean(pm_t_f))
+
+beeswarm(dat$pm_t_f ~ dat$bin_Black,
+         pch = 19, 
+         col = c("#3FA0FF", "#FFE099", "#F76D5E"),
+         xlab = "Percent of Black Residents Rank",
+         ylab = "Evening Temperature", 
+         labels = c("Low Percent Black", "Mid Percent Black", "High Percent Black")) %>%
+  segments(x0 = 0.8, y0 = dat$meantempBlack[[1]], x1 = 1.2, y1 = dat$meantempBlack[[1]], lwd=2, lty=3, col="black") %>%
+  segments(x0 = 1.8, y0 = dat$meantempBlack[[2]], x1 = 2.2, y1 = dat$meantempBlack[[2]], lwd=2, lty=3, col="black") %>%
+  segments(x0 = 2.8, y0 = dat$meantempBlack[[3]], x1 = 3.2, y1 = dat$meantempBlack[[3]], lwd=2, lty=3, col="black")
+```
+
+#### Percent Hispanic
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+dat$bin_Hispanic <- ntile(dat$percHisp, 3)
+
+dat <- dat %>%
+  group_by(bin_Hispanic) %>%
+  mutate(meantempHispanic = mean(pm_t_f))
+
+beeswarm(dat$pm_t_f ~ dat$bin_Hispanic,
+         pch = 19, 
+         col = c("#3FA0FF", "#FFE099", "#F76D5E"),
+         xlab = "Percent of Hispanic Residents Rank",
+         ylab = "Evening Temperature", 
+         labels = c("Low Percent Hispanic", "Mid Percent Hispanic", "High Percent Hispanic")) %>%
+  segments(x0 = 0.8, y0 = dat$meantempHispanic[[1]], x1 = 1.2, y1 = dat$meantempHispanic[[1]], lwd=2, lty=3, col="black") %>%
+  segments(x0 = 1.8, y0 = dat$meantempHispanic[[2]], x1 = 2.2, y1 = dat$meantempHispanic[[2]], lwd=2, lty=3, col="black") %>%
+  segments(x0 = 2.8, y0 = dat$meantempHispanic[[3]], x1 = 3.2, y1 = dat$meantempHispanic[[3]], lwd=2, lty=3, col="black")
+
+```
+
+#### Percent White
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+dat$bin_White <- ntile(dat$percWhite, 3)
+
+dat <- dat %>%
+  group_by(bin_White) %>%
+  mutate(meantempWhite = mean(pm_t_f))
+
+beeswarm(dat$pm_t_f ~ dat$bin_White,
+         pch = 19, 
+         col = c("#3FA0FF", "#FFE099", "#F76D5E"),
+         xlab = "Percent of White Residents Rank",
+         ylab = "Evening Temperature", 
+         labels = c("Low Percent White", "Mid Percent White", "High Percent White")) %>%
+  segments(x0 = 0.8, y0 = dat$meantempWhite[[1]], x1 = 1.2, y1 = dat$meantempWhite[[1]], lwd=2, lty=3, col="black") %>%
+  segments(x0 = 1.8, y0 = dat$meantempWhite[[2]], x1 = 2.2, y1 = dat$meantempWhite[[2]], lwd=2, lty=3, col="black") %>%
+  segments(x0 = 2.8, y0 = dat$meantempWhite[[3]], x1 = 3.2, y1 = dat$meantempWhite[[3]], lwd=2, lty=3, col="black")
+
+```
+
+
+### Scatterplot
+
+* Add explanation of trend line and how to interpret the scatterplots 
+
+* Could add correlations? 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE, fig.width = 10}
+
+temp_limits <- c(min(dat$pm_t_f), max(dat$pm_t_f))
+
+black <- ggplot(dat, aes(x=percBlack, y=pm_t_f, color = pm_t_f)) +
+  geom_point(size=2) +
+  scale_color_distiller(palette = "Spectral",
+                        limits = temp_limits) +
+  geom_smooth(method=lm, se=FALSE) +
+  xlab("Percent Black Residents") + ylab("Evening Temperature") + theme_minimal()
+
+hispanic <- ggplot(dat, aes(x=percHisp, y=pm_t_f, color = pm_t_f)) +
+  geom_point(size=2) +
+  scale_color_distiller(palette = "Spectral",
+                        limits = temp_limits) +
+  geom_smooth(method=lm, se=FALSE) +
+  xlab("Percent Hispanic Residents") + ylab("Evening Temperature") + theme_minimal()
+
+white <- ggplot(dat, aes(x=percWhite, y=pm_t_f, color = pm_t_f)) +
+  geom_point(size=2) +
+  scale_color_distiller(palette = "Spectral",
+                        limits = temp_limits) +
+  geom_smooth(method=lm, se=FALSE) +
+  xlab("Percent White Residents") + ylab("Evening Temperature") + theme_minimal()
+
+ggarrange(black, hispanic, white, nrow = 1, common.legend = TRUE)
+
+```
+
+
