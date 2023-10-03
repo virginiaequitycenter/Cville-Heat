@@ -46,8 +46,8 @@ temp_range <- temp_am %>%
 
 temp_select <- temp_pm$temp
 
-pal <- colorNumeric("Spectral", domain = temp_select, reverse = T)
-pal_rev <- colorNumeric("Spectral", domain = temp_select, reverse = F)
+pal <- colorNumeric("YlOrRd", domain = temp_select, reverse = F)
+pal_rev <- colorNumeric("YlOrRd", domain = temp_select, reverse = T)
 
 ```
 
@@ -301,22 +301,25 @@ temp_limits <- c(min(dat$pm_t_f), max(dat$pm_t_f))
 
 black <- ggplot(dat, aes(x=percBlack, y=pm_t_f, color = pm_t_f)) +
   geom_point(size=2) +
-  scale_color_distiller(palette = "Spectral",
-                        limits = temp_limits) +
+  scale_color_distiller(palette = "YlOrRd",
+                        limits = temp_limits,
+                        direction = 1) +
   geom_smooth(method=lm, se=FALSE) +
   xlab("Percent Black Residents") + ylab("Evening Temperature") + theme_minimal()
 
 hispanic <- ggplot(dat, aes(x=percHisp, y=pm_t_f, color = pm_t_f)) +
   geom_point(size=2) +
-  scale_color_distiller(palette = "Spectral",
-                        limits = temp_limits) +
+  scale_color_distiller(palette = "YlOrRd",
+                        limits = temp_limits,
+                        direction = 1) +
   geom_smooth(method=lm, se=FALSE) +
   xlab("Percent Hispanic Residents") + ylab("Evening Temperature") + theme_minimal()
 
 white <- ggplot(dat, aes(x=percWhite, y=pm_t_f, color = pm_t_f)) +
   geom_point(size=2) +
-  scale_color_distiller(palette = "Spectral",
-                        limits = temp_limits) +
+  scale_color_distiller(palette = "YlOrRd",
+                        limits = temp_limits,
+                        direction = 1) +
   geom_smooth(method=lm, se=FALSE) +
   xlab("Percent White Residents") + ylab("Evening Temperature") + theme_minimal()
 
