@@ -122,7 +122,7 @@ leaflet() %>%
 # pal <- colorNumeric("Spectral", domain = dat$pm_t_f, reverse = T)
 
 leaflet() %>% 
-  addProviderTiles("CartoDB.Positron") %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
   addPolygons(data = dat,
               fillColor = ~pal(dat$pm_t_f),
               weight = 1,
@@ -152,7 +152,7 @@ filmap1 <- dat %>%
   dplyr::filter(percBlack >= mean(percBlack, na.rm = T))
 
 leaflet() %>% 
-  addProviderTiles("CartoDB.Positron") %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
   addPolygons(data = filmap1,
               fillColor = ~pal(filmap1$pm_t_f),
               weight = 1,
@@ -177,7 +177,7 @@ filmap3 <- dat %>%
   filter(percHisp >= mean(percHisp, na.rm = T))
 
 leaflet() %>% 
-  addProviderTiles("CartoDB.Positron") %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
   addPolygons(data = filmap3,
               fillColor = ~pal(filmap3$pm_t_f),
               weight = 1,
@@ -202,7 +202,7 @@ filmap2 <- dat %>%
   filter(percWhite >= mean(percWhite, na.rm = T))
 
 leaflet() %>% 
-  addProviderTiles("CartoDB.Positron") %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
   addPolygons(data = filmap2,
               fillColor = ~pal(filmap2$pm_t_f),
               weight = 1,
