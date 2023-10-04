@@ -1,5 +1,5 @@
 ---
-title: "Map Testing & Report Planning - Evening Temps Only"
+title: "Map Testing & Report Planning"
 author: "Lee LeBoeuf, Beth Mitchell"
 date: '2023-10-03'
 output: html_document
