@@ -23,6 +23,7 @@ library(beeswarm)
 library(ggpubr)
 library(leafsync)
 library(htmltools)
+library(RColorBrewer)
 
 # reading in the data
 
@@ -282,7 +283,37 @@ white <- ggplot(dat, aes(x=percWhite, y=pm_t_f, color = pm_t_f)) +
   geom_smooth(method=lm, se=FALSE) +
   xlab("Percent White Residents") + ylab("Evening Temperature") + theme_minimal()
 
-ggarrange(black, hispanic, white, nrow = 1, common.legend = TRUE)
+ggarrange(black, white, hispanic, nrow = 1, common.legend = TRUE)
+
+```
+
+### Heat strip testing 
+
+```{r}
+
+theme_strip <- theme_minimal()+
+                 theme(axis.text.y = element_blank(),
+                       axis.line.y = element_blank(),
+                       axis.title = element_blank(),
+                       panel.grid.major = element_blank(),
+                       legend.title = element_blank(),
+                       axis.text.x = element_text(vjust = 3),
+                       panel.grid.minor = element_blank(),
+                        plot.title = element_text(size = 14, face = "bold"))
+
+col_strip <- brewer.pal(11, "RdBu")
+
+dat$percBlackd <- as.Date(dat$percBlack, origin = "1700-01-01")
+
+ggplot(dat, aes(x = percBlackd, y = 1, fill = pm_t_f))+
+        geom_tile()+
+           scale_x_date(date_breaks = "6 years",
+                     date_labels = "%Y",
+                     expand = c(0, 0))+
+           scale_y_continuous(expand = c(0, 0))+
+           scale_fill_gradientn(colors = rev(col_strip))+
+             guides(fill = guide_colorbar(barwidth = 1))+
+            labs(title = "Temp and Percent Black") + theme_strip
 
 ```
 
