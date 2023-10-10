@@ -143,6 +143,7 @@ m_am <- leaflet() %>%
                 fillOpacity = 0.9,
                 bringToFront = T),
               popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
                              "Average temperature: ", round(dat$am_t_f, 2))) %>% 
   leaflet::addLegend("bottomright", 
                      pal = pal_all_rev, 
@@ -167,6 +168,7 @@ m_af <- leaflet() %>%
                 fillOpacity = 0.9,
                 bringToFront = T),
               popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
                              "Average temperature: ", round(dat$af_t_f, 2))) %>% 
   leaflet::addLegend("bottomright", 
                      pal = pal_all_rev, 
@@ -191,6 +193,7 @@ m_pm <- leaflet() %>%
                 fillOpacity = 0.9,
                 bringToFront = T),
               popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
                              "Average temperature: ", round(dat$pm_t_f, 2))) %>% 
   leaflet::addLegend("bottomright", 
                      pal = pal_all_rev, 
@@ -237,6 +240,7 @@ mapall <- leaflet() %>%
                 fillOpacity = 0.9,
                 bringToFront = T),
               popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
                              "Average temperature: ", round(dat$pm_t_f, 2))) %>% 
   leaflet::addLegend("bottomright", 
                      pal = pal_pm_rev, 
@@ -264,6 +268,7 @@ mapblack <- leaflet() %>%
   addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
                          options = layersControlOptions(collapsed = FALSE),
                          position = "bottomright") %>%
+  hideGroup("Neighborhood Boundaries") %>% 
   addPolygons(data = filmap1,
               fillColor = ~pal_pm(filmap1$pm_t_f),
               weight = 1,
@@ -275,6 +280,7 @@ mapblack <- leaflet() %>%
                 fillOpacity = 0.9,
                 bringToFront = T),
               popup = paste0("GEOID: ", filmap1$GEOID20, "<br>",
+                             "Neighborhood: ", filmap1$neighborhood, "<br>",
                              "Average temperature: ", round(filmap1$pm_t_f, 2))) %>% 
   leaflet::addLegend("bottomright", 
                      pal = pal_pm_rev, 
@@ -294,8 +300,8 @@ mapwhite <- leaflet() %>%
   addProviderTiles("CartoDB.Voyager") %>% 
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
   addMapPane('neighBoundaries', zIndex = 410) %>%
-    addMapPane('neighBoundaries', zIndex = 410) %>%
-    addPolygons(data= neighbor_shape, color = "blue",
+  addMapPane('neighBoundaries', zIndex = 410) %>%
+  addPolygons(data= neighbor_shape, color = "blue",
                     fill = FALSE,
                     weight = 1.5,
                     group = 'Neighborhood Boundaries',
@@ -303,6 +309,7 @@ mapwhite <- leaflet() %>%
   addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
                          options = layersControlOptions(collapsed = FALSE),
                          position = "bottomright") %>%
+  hideGroup("Neighborhood Boundaries") %>% 
   addPolygons(data = filmap2,
               fillColor = ~pal_pm(filmap2$pm_t_f),
               weight = 1,
@@ -314,6 +321,7 @@ mapwhite <- leaflet() %>%
                 fillOpacity = 0.9,
                 bringToFront = T),
               popup = paste0("GEOID: ", filmap2$GEOID20, "<br>",
+                             "Neighborhood: ", filmap2$neighborhood, "<br>",
                              "Average temperature: ", round(filmap2$pm_t_f, 2))) %>% 
   leaflet::addLegend("bottomright", 
                      pal = pal_pm_rev, 
@@ -332,8 +340,8 @@ maphisp <- leaflet() %>%
   addProviderTiles("CartoDB.Voyager") %>% 
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
   addMapPane('neighBoundaries', zIndex = 410) %>%
-    addMapPane('neighBoundaries', zIndex = 410) %>%
-    addPolygons(data= neighbor_shape, color = "blue",
+  addMapPane('neighBoundaries', zIndex = 410) %>%
+  addPolygons(data= neighbor_shape, color = "blue",
                     fill = FALSE,
                     weight = 1.5,
                     group = 'Neighborhood Boundaries',
@@ -341,6 +349,7 @@ maphisp <- leaflet() %>%
   addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
                          options = layersControlOptions(collapsed = FALSE),
                          position = "bottomright") %>%
+  hideGroup("Neighborhood Boundaries") %>% 
   addPolygons(data = filmap3,
               fillColor = ~pal_pm(filmap3$pm_t_f),
               weight = 1,
@@ -352,6 +361,7 @@ maphisp <- leaflet() %>%
                 fillOpacity = 0.9,
                 bringToFront = T),
               popup = paste0("GEOID: ", filmap3$GEOID20, "<br>",
+                             "Neighborhood: ", filmap3$neighborhood, "<br>",
                              "Average temperature: ", round(filmap3$pm_t_f, 2))) %>% 
   leaflet::addLegend("bottomright", 
                      pal = pal_pm_rev, 
@@ -404,7 +414,7 @@ ggarrange(black, hispanic, white, nrow = 1, common.legend = TRUE)
 
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 library(leaflet.extras2)
-tree <- readRDS("cvilltree_blocks.RDS")
+tree <- readRDS("Data/cvilltree_blocks.RDS")
 
 pal_tree <- colorNumeric("Greens", domain = tree$Histogram, reverse = F)
 pal_tree_rev <- colorNumeric("Greens", domain = tree$Histogram, reverse = T)
@@ -439,32 +449,30 @@ leaflet() %>%
   leaflet(width = "100%", height = "900px") %>%
       addMapPane("left", zIndex = 0) %>%
       addMapPane("right", zIndex = 0) %>%
-  addMapPane('neighBoundaries', zIndex = 410) %>%
-      # addTiles(group = "base", layerId = "baseid",
-      #          options = pathOptions(pane = "right")) %>%
-     addProviderTiles(providers$CartoDB.Positron,
+      addMapPane('neighBoundaries', zIndex = 410) %>%
+      addProviderTiles(providers$CartoDB.Positron,
                        group="base", layerId = "baseid",
                        options = pathOptions(pane = "right")) %>%
       addProviderTiles(providers$CartoDB.Positron,
                        group="carto", layerId = "cartoid",
                        options = pathOptions(pane = "left")) %>%
    
-  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
-  addPolygons(data = test1,
-              fillColor = ~pal_pm(test1$pm_t_f),
+      fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+      addPolygons(data = dat,
+              fillColor = ~pal_pm(dat$pm_t_f),
               weight = 1,
               opacity = 1,
-              color = ~pal_pm(test1$pm_t_f), 
+              color = ~pal_pm(dat$pm_t_f), 
               fillOpacity = 0.7,
               highlight = highlightOptions(
                 weight = 2,
                 fillOpacity = 0.9,
                 bringToFront = T),
-              popup = paste0("GEOID: ", test1$GEOID20, "<br>",
-                             "Neighborhood: ", test1$neighborhood, "<br>",
-                             "Average temperature: ", round(test1$pm_t_f, 2)),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
+                             "Average temperature: ", round(dat$pm_t_f, 2)),
                        options = pathOptions(pane = "left")) %>%
-  leaflet::addLegend("bottomleft", 
+      leaflet::addLegend("bottomleft", 
                      title = paste0("Afternoon","<br>", "temperatures"),
                      pal = pal_pm_rev, 
                      values = temp_select, 
@@ -491,15 +499,6 @@ leaflet() %>%
   addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
                          options = layersControlOptions(collapsed = FALSE),
                          position = "topright") %>%
-      # addCircleMarkers(data = breweries91[1:15,],
-      #                  color = "blue", group = "blue",
-      #                  options = pathOptions(pane = "left")) %>%
-      # addCircleMarkers(data = breweries91[15:20,],
-      #                  color = "yellow", group = "yellow") %>%
-      # addCircleMarkers(data = breweries91[15:30,],
-      #                  color = "red", group = "red",
-      #                  options = pathOptions(pane = "right")) %>%
-      # addLayersControl(overlayGroups = c("blue","red", "yellow")) %>%
   leaflet::addLegend("bottomright", 
                      title = "Tree Canopy",
                      pal = pal_tree_rev, 
