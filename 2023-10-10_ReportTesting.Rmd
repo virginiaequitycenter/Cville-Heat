@@ -113,17 +113,15 @@ As many scientists predicted, we are already experiencing the beginning effects 
 
 These temperature disparities will further exacerbate disparities in housing costs ([like air conditioning](https://journals.sagepub.com/doi/10.1177/0956247816655676)) and [health outcomes](https://www.epa.gov/heatislands/heat-island-impacts). 
 
-Below, we map temperature readings across the city along with demographic information to see which communities of people in Charlottesville will be most impacted by urban heat island effects. 
+Below, we map temperature readings across the city along with demographic information to see which communities of people in Charlottesville will be most impacted by urban heat island effects. These maps show the average temperature for each census block in the City from a series of temperature readings around the city on August 24th, 2021. These data were intentionally collected on a day that is typically hot with low levels of precipitation. Our maps show the temperatures by [census blocks](https://www2.census.gov/geo/pdfs/reference/GARM/Ch11GARM.pdf), which are the smallest geographical unit used by the U.S. Census. 
 
-### Daily Temperature Fluctuations 
+For more information about the data, visit the [City of Charlottesville Open Data Portal](https://opendata.charlottesville.org/datasets/charlottesville::urban-heat-data-2021-morning-traverse/about). 
+
+### Temperature Fluctuations on August, 24th 2021
 
 Obviously, outside temperatures are not consistent across an entire day. Urban heat islands form when heat gets trapped in concrete and other industrial material, so the gradual increases in temperature you would expect to see the longer the sun is out is amplified.
 
-The maps below temperature readings around the City of Charlottesville in the morning, afternoon, and evening from the same day. Seeing the progression of increasing temperatures throughout the day highlights how concrete-heavy areas trap heat while green spaces manage to regulate and cool the temperature. The larger disparities in the evening also coincide with the hours when families are more likely to be home and feel the differences--in the evening after work. 
-
-* Add emphasis that green spaces that were warm in the afternoon begin to cool by evening. 
-
-* Add explanation that we're looking at census maps. 
+The maps below temperature readings around the City of Charlottesville in the morning, afternoon, and evening from the same day. As one would expect, temperatures are lowest in the morning, peak in the afternoon, and then begin to decline in the evening. However, the progression of temperatures throughout the day highlights how concrete-heavy areas trap heat while spaces with more greenery manage to regulate and cool the temperature. By the evening, there are obvious disparities in the temperature between areas that cooled significantly and those that did not. The larger disparities in the evening also coincide with the hours when families are more likely to be home and feel the differences--in the evening after work.  
 
 <div class="leafletsync">
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
@@ -207,9 +205,119 @@ sync(list(m_am, m_af, m_pm), ncol = 3)
 ```
 </div>
 
+### Tree Canopy and Cooling
+
+While concrete traps heat, green spaces have a meaningful cooling effect. As shown in the map below, temperatures are highest in the evening in areas that have the highest amount of concrete surface areas---areas like the downtown mall or near Barrack's Shopping Center. The areas that have the densest tree coverage or tree canopy tend to be much cooler. Drag the center line below to the right and left sides of the map to see where temperatures are highest or where tree canopy is densest. As you can see, the downtown area and main street are much hotter than areas close to parks and neighborhoods with more green space.
+
+__Note:__ The legend and scale for the following maps is slightly different than the maps already shown. Since we are only looking at the evening temperatures, which do not exceed 90 degrees, the scale ends at 90 instead of 95 like the first set of maps. We made this change to make seeing differences in temperature easier. 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+library(leaflet.extras2)
+tree <- readRDS("Data/cvilltree_blocks.RDS")
+
+pal_tree <- colorNumeric("Greens", domain = tree$Histogram, reverse = F)
+pal_tree_rev <- colorNumeric("Greens", domain = tree$Histogram, reverse = T)
+
+# leaflet() %>% 
+#   addMapPane("left", zIndex = 0) %>%
+#   addMapPane("right", zIndex = 0) %>%
+#   # addTiles(group = "base", layerId = "baseid",
+#                # options = pathOptions(pane = "right")) %>%
+#   addProviderTiles("CartoDB.Positron") %>% 
+#   addPolygons(data = tree_extract_blocks,
+#               fillColor = ~pal_tree(tree_extract_blocks$Histogram),
+#               weight = 1,
+#               opacity = 1,
+#               color = "white", 
+#               fillOpacity = 0.6,
+#               highlight = highlightOptions(
+#                 weight = 2,
+#                 fillOpacity = 0.8,
+#                 bringToFront = T),
+#               popup = paste0("GEOID: ", tree_extract_blocks$GEOID20, "<br>",
+#                              "Tree Canopy: ", round(tree_extract_blocks$Histogram),"%")) %>% 
+#   leaflet::addLegend("bottomright", pal = pal_tree_rev, values = (tree_extract_blocks$Histogram), opacity = 0.7) %>%
+#       addSidebyside(layerId = "sidecontrols",
+#                     rightId = "baseid",
+#                     leftId = "opencycle")
+
+tree_title <- h4("Tree Canopy", class = "title")
+temp_title <- h4("Afternoon temperatures", class = "title")
+
+leaflet() %>%
+  leaflet(width = "100%", height = "900px") %>%
+      addMapPane("left", zIndex = 0) %>%
+      addMapPane("right", zIndex = 0) %>%
+      addMapPane('neighBoundaries', zIndex = 410) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       group="base", layerId = "baseid",
+                       options = pathOptions(pane = "right")) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       group="carto", layerId = "cartoid",
+                       options = pathOptions(pane = "left")) %>%
+   
+      fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+      addPolygons(data = dat,
+              fillColor = ~pal_pm(dat$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_pm(dat$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
+                             "Average temperature: ", round(dat$pm_t_f, 2)),
+                       options = pathOptions(pane = "left")) %>%
+      leaflet::addLegend("bottomleft", 
+                     title = paste0("Afternoon","<br>", "temperatures"),
+                     pal = pal_pm_rev, 
+                     values = temp_select, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+  addPolygons(data = tree,
+              fillColor = ~pal_tree(tree$Histogram),
+              weight = 1,
+              opacity = 1,
+              color = "white", 
+              fillOpacity = 0.6,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.8,
+                bringToFront = T),
+              popup = paste0("GEOID: ", tree$GEOID20, "<br>",
+                             "Tree Canopy: ", round(tree$Histogram),"%"),
+              options = pathOptions(pane = "right")) %>%
+  addPolygons(data= neighbor_shape, color = "blue",
+                    fill = FALSE,
+                    weight = 1.5,
+                    group = 'Neighborhood Boundaries',
+                    options = pathOptions(pane = 'neighBoundaries')) %>%
+  addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
+                         options = layersControlOptions(collapsed = FALSE),
+                         position = "topright") %>%
+  leaflet::addLegend("bottomright", 
+                     title = "Tree Canopy",
+                     pal = pal_tree_rev, 
+                     values = (tree$Histogram), 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "%")) %>%
+      addSidebyside(layerId = "sidecontrols",
+                    rightId = "baseid",
+                    leftId = "opencycle")
+
+
+
+
+```
+
 ### Filtered maps 
 
-These maps provide a nice global view of the city, but to make it easier to understand the impact on specific communities, below we show the same maps but only with blocks that meet a certain threshold of racial composition. In each map, we've filtered the data to only show census blocks whose percent population of each racial group is above average for all the blocks in the area. As a whole, roughly XX% of Charlottesville is White, XX% is Black, and XX% is Hispanic (with XX% belonging to other races). However, do to longstanding neighborhood segregation resulting from racial wealth/income disparities and other zoning policies, those populations are not evenly distributed around the city. In other words, although the city as a whole is XX% White, XX% Black, and XX% Hispanic, any given census block might be 10% White, 90% Black, and 20% Hispanic. So, we took the average percent of each race across all census blocks, and the maps below only show the blocks that fell above the average for each race.
+These maps provide a nice global view of the city, but to make it easier to understand the impact on specific communities, below we show the same maps but only with blocks that meet a certain threshold of racial composition. In each map, we've filtered the data to only show census blocks whose percent population of each racial group is above average for all the blocks in the area. As a whole, [according to the 2020 Census](https://www.census.gov/quickfacts/fact/table/charlottesvillecityvirginia/RTN130217), roughly 69.7% of Charlottesville is White, 18% is Black, and 5.7% is Hispanic. However, do to longstanding neighborhood segregation resulting from racial wealth/income disparities and other zoning policies, those populations are not evenly distributed around the city. In other words, although the city as a whole is 69.7% White, 18% Black, and 5.7% Hispanic, any given census block might be 10% White, 90% Black, and 20% Hispanic. So, we took the average percent of each race across all census blocks, and the maps below only show the blocks that fell above the average for each race.
+
+Multiple factors have contributed to the concentration of certain racial groups throughout the City of Charlottesville across time, all of which have primarily focused on the segregation of White and Black residents. These efforts include [racial covenants](https://mappingcville.com/2019/01/28/1903-1948-charlottesvilles-first-racially-restrictive-covenants/) that restricted the sale of White-owned property to Black residents and the [selective expansion of the University of Virginia](https://news.virginia.edu/content/uva-and-history-race-property-and-power) forcing historically Black neighborhoods to disperse. As a result of the City's history of segregation, the disparities shown below are most obvious between White and Black residents, while Hispanic residents seem to be slightly more evenly distributed throughout the city. 
 
 <div class="leafletsync">
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
@@ -409,108 +517,6 @@ white <- ggplot(dat, aes(x=percWhite, y=pm_t_f, color = pm_t_f)) +
   xlab("Percent White Residents") + ylab("Evening Temperature") + theme_minimal()
 
 ggarrange(black, hispanic, white, nrow = 1, common.legend = TRUE)
-
-```
-
-```{r, warning=FALSE, echo=FALSE, message=FALSE}
-library(leaflet.extras2)
-tree <- readRDS("Data/cvilltree_blocks.RDS")
-
-pal_tree <- colorNumeric("Greens", domain = tree$Histogram, reverse = F)
-pal_tree_rev <- colorNumeric("Greens", domain = tree$Histogram, reverse = T)
-
-# leaflet() %>% 
-#   addMapPane("left", zIndex = 0) %>%
-#   addMapPane("right", zIndex = 0) %>%
-#   # addTiles(group = "base", layerId = "baseid",
-#                # options = pathOptions(pane = "right")) %>%
-#   addProviderTiles("CartoDB.Positron") %>% 
-#   addPolygons(data = tree_extract_blocks,
-#               fillColor = ~pal_tree(tree_extract_blocks$Histogram),
-#               weight = 1,
-#               opacity = 1,
-#               color = "white", 
-#               fillOpacity = 0.6,
-#               highlight = highlightOptions(
-#                 weight = 2,
-#                 fillOpacity = 0.8,
-#                 bringToFront = T),
-#               popup = paste0("GEOID: ", tree_extract_blocks$GEOID20, "<br>",
-#                              "Tree Canopy: ", round(tree_extract_blocks$Histogram),"%")) %>% 
-#   leaflet::addLegend("bottomright", pal = pal_tree_rev, values = (tree_extract_blocks$Histogram), opacity = 0.7) %>%
-#       addSidebyside(layerId = "sidecontrols",
-#                     rightId = "baseid",
-#                     leftId = "opencycle")
-
-tree_title <- h4("Tree Canopy", class = "title")
-temp_title <- h4("Afternoon temperatures", class = "title")
-
-leaflet() %>%
-  leaflet(width = "100%", height = "900px") %>%
-      addMapPane("left", zIndex = 0) %>%
-      addMapPane("right", zIndex = 0) %>%
-      addMapPane('neighBoundaries', zIndex = 410) %>%
-      addProviderTiles(providers$CartoDB.Positron,
-                       group="base", layerId = "baseid",
-                       options = pathOptions(pane = "right")) %>%
-      addProviderTiles(providers$CartoDB.Positron,
-                       group="carto", layerId = "cartoid",
-                       options = pathOptions(pane = "left")) %>%
-   
-      fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
-      addPolygons(data = dat,
-              fillColor = ~pal_pm(dat$pm_t_f),
-              weight = 1,
-              opacity = 1,
-              color = ~pal_pm(dat$pm_t_f), 
-              fillOpacity = 0.7,
-              highlight = highlightOptions(
-                weight = 2,
-                fillOpacity = 0.9,
-                bringToFront = T),
-              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
-                             "Neighborhood: ", dat$neighborhood, "<br>",
-                             "Average temperature: ", round(dat$pm_t_f, 2)),
-                       options = pathOptions(pane = "left")) %>%
-      leaflet::addLegend("bottomleft", 
-                     title = paste0("Afternoon","<br>", "temperatures"),
-                     pal = pal_pm_rev, 
-                     values = temp_select, 
-                     opacity = 0.7, 
-                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
-  addPolygons(data = tree,
-              fillColor = ~pal_tree(tree$Histogram),
-              weight = 1,
-              opacity = 1,
-              color = "white", 
-              fillOpacity = 0.6,
-              highlight = highlightOptions(
-                weight = 2,
-                fillOpacity = 0.8,
-                bringToFront = T),
-              popup = paste0("GEOID: ", tree$GEOID20, "<br>",
-                             "Tree Canopy: ", round(tree$Histogram),"%"),
-              options = pathOptions(pane = "right")) %>%
-  addPolygons(data= neighbor_shape, color = "blue",
-                    fill = FALSE,
-                    weight = 1.5,
-                    group = 'Neighborhood Boundaries',
-                    options = pathOptions(pane = 'neighBoundaries')) %>%
-  addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
-                         options = layersControlOptions(collapsed = FALSE),
-                         position = "topright") %>%
-  leaflet::addLegend("bottomright", 
-                     title = "Tree Canopy",
-                     pal = pal_tree_rev, 
-                     values = (tree$Histogram), 
-                     opacity = 0.7, 
-                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "%")) %>%
-      addSidebyside(layerId = "sidecontrols",
-                    rightId = "baseid",
-                    leftId = "opencycle")
-
-
-
 
 ```
 

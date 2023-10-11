@@ -303,9 +303,12 @@ theme_strip <- theme_minimal()+
 
 col_strip <- brewer.pal(11, "RdBu")
 
-dat$percBlackd <- as.Date(dat$percBlack, origin = "1700-01-01")
+strip <- dat %>%
+  filter(pm_t_f > median(pm_t_f))
 
-ggplot(dat, aes(x = percBlackd, y = 1, fill = pm_t_f))+
+strip$pm_t_fd <- as.Date(strip$pm_t_f, origin = "1700-01-01")
+
+ggplot(strip, aes(x = pm_t_fd, y = 1, fill = percBlack))+
         geom_tile()+
            scale_x_date(date_breaks = "6 years",
                      date_labels = "%Y",
