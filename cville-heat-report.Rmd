@@ -143,6 +143,7 @@ pal_pm_rev <- colorNumeric("YlOrRd", domain = temp_select, reverse = T)
 
 ```
 
+
 ## Rising Temperatures
 
 One of the top climate hazards facing Charlottesville are rising temperatures. We already see evidence that the effects of heat from the changing climate have a larger impact on low-income communities in the [United States](https://www.npr.org/2021/07/14/1015983700/extreme-heat-is-getting-worse-for-low-income-non-white-americans-a-new-study-sho) and [around the world](https://www.theguardian.com/global-development/2022/jan/14/worlds-poorest-bear-brunt-of-climate-crisis-10-underreported-emergencies). In the United States, low-income families living in urban areas with high amounts of concrete and low amounts of green space are [hit the hardest by rising temperatures](https://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-mosthttps://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-most).
@@ -1078,6 +1079,8 @@ ggarrange(black, white, hispanic, nrow = 1, legend = "none")
 ## Citation
 
 Lee LeBoeuf and Elizabeth Mitchell. “Charlottesville Urban Heat Islands.” UVA Democracy Initiative Center for the Redress of Inequity through Community-Engaged Scholarship. https://virginiaequitycenter.github.io/Cville-Heat/cville-heat-report.
+
+
 
 
 
