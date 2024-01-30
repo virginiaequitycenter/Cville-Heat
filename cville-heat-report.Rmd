@@ -146,13 +146,13 @@ pal_pm_rev <- colorNumeric("YlOrRd", domain = temp_select, reverse = T)
 
 ## Rising Temperatures
 
-One of the top climate hazards facing Charlottesville are rising temperatures. We already see evidence that the effects of heat from the changing climate have a larger impact on low-income communities in the [United States](https://www.npr.org/2021/07/14/1015983700/extreme-heat-is-getting-worse-for-low-income-non-white-americans-a-new-study-sho) and [around the world](https://www.theguardian.com/global-development/2022/jan/14/worlds-poorest-bear-brunt-of-climate-crisis-10-underreported-emergencies). In the United States, low-income families living in urban areas with high amounts of concrete and low amounts of green space are [hit the hardest by rising temperatures](https://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-mosthttps://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-most).
+One of the top climate hazards facing Charlottesville is rising temperatures. The effects of heat from the changing climate have a larger impact on low-income communities in the [United States](https://www.npr.org/2021/07/14/1015983700/extreme-heat-is-getting-worse-for-low-income-non-white-americans-a-new-study-sho) and [around the world](https://www.theguardian.com/global-development/2022/jan/14/worlds-poorest-bear-brunt-of-climate-crisis-10-underreported-emergencies). In the United States, low-income families living in urban areas with high amounts of concrete and low amounts of green space are [hit the hardest by rising temperatures](https://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-mosthttps://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-most).
 
 Rising temperatures have a wide impact on our lives. More hot days mean an increase in housing costs and energy use, like [air conditioning](https://journals.sagepub.com/doi/10.1177/0956247816655676). Urban heat islands – areas in the city where heat is trapped by concrete and other industrial material – [can increase air pollution and impact health outcomes](https://www.epa.gov/heatislands/heat-island-impacts).
 
 Below, we show a series of maps and charts with summer temperature readings along with demographic information to see which communities of people in Charlottesville are most impacted by urban heat island effects.
 
-These maps show the average temperature for each [census block](https://www.census.gov/newsroom/blogs/random-samplings/2011/07/what-are-census-blocks.html) in the city from a series of temperature readings taken on August 24th, 2021. The data was collected on a day with high heat and low levels of precipitation as part of a nation-wide [Urban Heat Island Mapping Campaign](https://www.charlottesville.gov/1469/Urban-Heat-Island-Mapping-Campaign).
+These maps show the average temperature for each [census block](https://www.census.gov/newsroom/blogs/random-samplings/2011/07/what-are-census-blocks.html) in the city from a series of temperature readings taken on August 24th, 2021. The data was collected on a day with high heat and low levels of precipitation as part of the City of Charlottesville's participation in a nation-wide [Urban Heat Island Mapping Campaign](https://www.charlottesville.gov/1469/Urban-Heat-Island-Mapping-Campaign).
 
 For more information about the temperature data, visit the [City of Charlottesville Open Data Portal](https://opendata.charlottesville.org/datasets/charlottesville::urban-heat-data-2021-morning-traverse/about).
 
@@ -160,7 +160,7 @@ For more information about the temperature data, visit the [City of Charlottesvi
 
 Urban heat islands are areas in the city that experience higher temperatures than outlying areas. Buildings, roads, and other infrastructure absorb and re-emit heat more than natural landscapes of trees, green space, and water. Areas in the city with a lot of concrete and limited greenery trap the heat from the sun during the day, keeping it hot throughout the evening. Places with more green space and tree cover cool down more in the evening compared to urban heat islands.
 
-The maps below show the temperature readings in Charlottesville in the morning, afternoon, and evening of August 24th, 2021. You can see the concrete-heavy areas downtown and surrounding Emmet St/Hwy 29, where the heat from the day remains in the evening. These areas are also warmer in the morning: the urban heat islands remain hotter overnight compared to areas with more greenery, where temperatures can cool down further after the sun sets.
+The maps below show the temperature readings in Charlottesville in the morning, afternoon, and evening of August 24th, 2021. You can see the concrete-heavy areas downtown and surrounding Emmet St/Hwy 29, where the heat from the day remains in the evening. These areas are also warmer in the morning: The urban heat islands remain hotter overnight compared to areas with more greenery, where temperatures can cool down further after the sun sets.
   
 <br />
 <div class="leafletsync full-screen">
@@ -254,7 +254,7 @@ sync(list(m_am, m_af, m_pm), ncol = 1)
 
 ## Tree Canopy and Cooling
 
-While concrete traps heat, green spaces have a meaningful cooling effect. The map below shows Charlottesville from two perspectives: the temperatures during the evening, when people are likely to be home and feeling the effects of a hot day, and the amount of tree canopy, or tree coverage. 
+While concrete traps heat, green spaces have a meaningful cooling effect. The map below shows Charlottesville from two perspectives: the temperatures during the evening (when people are likely to be home and feeling the effects of a hot day) and the amount of tree canopy, or tree coverage. 
 
 Temperatures are highest in the evening in areas with more buildings and concrete surface areas. Areas that have the densest tree coverage or tree canopy tend to be much cooler. 
 
@@ -551,7 +551,7 @@ To summarize the maps above:
   - The hottest evening temperature in a Charlottesville census block is <strong>`r round(max(dat$pm_t_f), digits=1)`°F</strong>
   - The coolest evening temperature in a Charlottesville census block <strong>`r round(min(dat$pm_t_f), digits=1)`°F</strong>
 
-On average, Black Charlottesville residents experience slightly warmer evening temperatures than the overall average. Compared to White residents, Black residents experience over a `r round((avg_temp_b - avg_temp_w), digits=0)`°F hotter average temperature. As temperatures rise as a result of our changing climate, this disparities may increase over time. 
+On average, Black Charlottesville residents experience slightly warmer evening temperatures than the overall average. Compared to White residents, Black residents experience over a `r round((avg_temp_b - avg_temp_w), digits=0)`°F hotter average temperature. As temperatures rise as a result of our changing climate, these disparities may increase over time. 
 
 For more information on heat islands and equity, see the [EPA site on heat islands](https://www.epa.gov/heatislands/heat-islands-and-equity).
 
