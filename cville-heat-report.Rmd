@@ -1080,7 +1080,7 @@ ggarrange(black, white, hispanic, nrow = 1, legend = "none")
 
 ## Citation
 
-Lee LeBoeuf and Elizabeth Mitchell. “Charlottesville Urban Heat Islands.” UVA Democracy Initiative Center for the Redress of Inequity through Community-Engaged Scholarship. https://virginiaequitycenter.github.io/Cville-Heat/cville-heat-report.
+Lee LeBoeuf, Elizabeth Mitchell, and Michele Claibourn. “Charlottesville Urban Heat Islands.” UVA Democracy Initiative Center for the Redress of Inequity through Community-Engaged Scholarship. https://virginiaequitycenter.github.io/Cville-Heat/cville-heat-report.
 
 
 
