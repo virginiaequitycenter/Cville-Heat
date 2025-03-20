@@ -5,11 +5,11 @@ output:
     template: cville-heat-template.html
 ---
 ```{css, echo=FALSE}
-.main-container.container-fluid {
-max-width: 1000px;
+.main-container {
+  max-width: 1000px !important;
   margin-left: auto;
   margin-right: auto;
-  padding: 0 4.167%;
+  padding: 0 !important;
 }
 
 div.section {
