@@ -2,15 +2,15 @@
 title: "Charlottesville Urban Heat Islands"
 output: 
   html_document:
-    template: cville-heat-template.html
+    template: external-rmd-template.html
 ---
 ```{css, echo=FALSE}
-.main-container {
+/*.main-container {
   max-width: 1000px !important;
   margin-left: auto;
   margin-right: auto;
   padding: 0 !important;
-}
+}*/
 
 div.section {
 display: inline-block;

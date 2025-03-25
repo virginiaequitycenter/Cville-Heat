@@ -1,0 +1,966 @@
+<!-- R Markdown HTML Template for external link for Charlottesville Equity Atlas -->
+<!DOCTYPE html>
+
+<html $if(lang)$ lang="$lang$" xml:lang="$lang$" $else$ lang="en" $endif$ $if(dir)$ dir="$dir$"$endif$  prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="Community-Centered Analysis | Charlottesville Regional Data Resource Hub">
+<meta property="og:title" content="$pagetitle$">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://raw.githubusercontent.com/virginiaequitycenter/cville-equity-atlas/refs/heads/main/assets/img/atlas-image-card.png">
+<meta property="og:image:type" content="image/jpg">
+
+$if(theme)$
+$else$
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+$endif$
+
+$for(author-meta)$
+<meta name="author" content="$author-meta$" />
+$endfor$
+
+$if(date-meta)$
+<meta name="date" content="$date-meta$" />
+$endif$
+
+<title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
+
+<link rel="shortcut icon" type="image/png" sizes="32x32" href="https://virginiaequitycenter.github.io/cville-equity-atlas/assets/img/ec-icon.png"/>
+
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+  $if(quotes)$
+  q { quotes: "“" "”" "‘" "’"; }
+  $endif$
+  $if(displaymath-css)$
+  .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  $endif$
+</style>
+
+$if(highlightjs)$
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+$endif$
+
+$if(highlight-downlit)$
+<style type="text/css">
+  /* from bookdown::bs4_book() css */
+  code a:any-link {
+    color: inherit; /* use colour from syntax highlighting */
+    text-decoration: underline;
+    text-decoration-color: #ccc;
+  }
+</style>
+$endif$
+
+$if(highlighting-css)$
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+$highlighting-css$
+
+$if(code_folding)$
+.sourceCode .row {
+  width: 100%;
+}
+.sourceCode {
+  overflow-x: auto;
+}
+.code-folding-btn {
+  margin-right: -30px;
+}
+$endif$
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+$endif$
+
+$if(abstract)$
+<style type="text/css">
+  p.abstract{
+    text-align: center;
+    font-weight: bold;
+  }
+  div.abstract{
+    margin: auto;
+    width: 90%;
+  }
+</style>
+$endif$
+
+$if(source_embed)$
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+$endif$
+
+$if(csl-css)$
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+$if(csl-entry-spacing)$
+  margin-bottom: $csl-entry-spacing$;
+$endif$
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+$endif$
+
+$for(css)$
+<link rel="stylesheet" href="$css$" $if(html5)$$else$type="text/css" $endif$/>
+$endfor$
+
+
+$if(theme)$
+<style type = "text/css">
+.main-container {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+$if(kable-scroll)$
+<style type="text/css">
+.kable-table {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: auto;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-bottom: 20px;
+  max-height: 350px;
+}
+
+.kable-table table {
+  margin-bottom: 0px;
+}
+
+.kable-table table>thead>tr>th {
+  border: none;
+  border-bottom: 2px solid #dddddd;
+}
+
+.kable-table table>thead {
+  background-color: #fff;
+}
+</style>
+$endif$
+
+$if(navbar)$
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $$('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $$(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+$endif$
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+$if(code_menu)$
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+$endif$
+
+
+$if(toc_float)$
+
+<style type="text/css">
+
+  #$idprefix$TOC {
+    margin: 25px 0px 20px 0px;
+  }
+  @media (max-width: 768px) {
+  #$idprefix$TOC {
+    position: relative;
+    width: 100%;
+  }
+  }
+  
+  #$idprefix$TOC li {
+    margin-bottom: .2em;
+  }
+  
+  #toc-title {
+    margin-top: 0;
+    margin-bottom: .4em;
+  }
+  
+  @media print {
+  $if(toc_print)$
+  $else$
+  #$idprefix$TOC {
+    display: none !important;
+  }
+  $endif$
+  .toc-content {
+    /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+    float: right;
+  }
+  }
+  
+  @media (min-width: 768px) {
+    .toc-content {
+    /* padding-left: 30px; */
+    padding-right: 45px;
+  }
+  }
+  
+  
+  div.tocify {
+    width: 25% !important;
+    max-width: 260px;
+    max-height: 85%;
+  }
+  
+  @media (min-width: 768px) and (max-width: 991px) {
+    div.tocify {
+      width: 33.33333%;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    div.tocify {
+      width: 100%;
+      max-width: none;
+      max-height: 95%;
+    }
+  }
+  
+  .tocify-header,
+  .tocify-subheader,
+  .tocify-item {
+    text-indent: 0px;
+  }
+
+  .tocify ul, .tocify li {
+    line-height: 18px;
+  }
+  
+  .tocify-subheader .tocify-item {
+    font-size: 0.90em;
+    line-height: 16px;
+  }
+  
+  .tocify .list-group-item {
+    border-radius: 0px;
+  }
+  
+  $if(toc_collapsed)$
+  $else$
+  .tocify-subheader {
+    display: inline;
+  }
+  .tocify-subheader .tocify-item {
+    font-size: 0.95em;
+  }
+  $endif$
+
+  /* added from atlas _toc.scss */
+
+  #TOC {
+    margin: 25px 0px 20px 0px;
+}
+
+@media (max-width: 768px) {
+    #TOC {
+        display: none;}
+}
+
+#TOC li {
+    margin-bottom: .2em;
+}
+
+.toc-mobile {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .toc-mobile {
+        display: block;
+        margin-bottom: 2rem;
+    }
+}
+
+.toc-mobile ul, .toc-mobile li, .toc-mobile a {
+    padding-left: 0;
+    list-style: none;
+    line-height: 18px;
+}
+
+.toc-mobile li {
+    position: relative;
+    margin-bottom: .2em;
+    padding: 5px;
+    border-radius: 0px;
+}
+
+.toc-mobile li ul {
+    padding-left: 2rem;
+}
+
+.toc-mobile li ul li {
+    margin-bottom: 0;
+    list-style: circle;
+}
+
+.toc-mobile a {
+    color: #212529 !important;
+}
+
+#toc-title {
+    margin-top: 0;
+    font-size: calc(1.3em + .6vw) !important;
+    margin-bottom: .4em;
+}
+@media print {
+    .toc-content {
+        float: right;
+    }
+}
+
+@media (min-width: 768px) {
+    .toc-content {
+        padding-right: 45px;
+    }    
+}
+
+/* div.tocify {
+    width: 16.66666667%;
+    max-width: 260px;
+    max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    div.tocify {
+        width: 20%;
+    }
+}
+
+@media (max-width: 767px) {
+    div.tocify {
+        width: 100%;
+        max-width: none;
+        max-height: 95%;
+    }
+} */
+
+.tocify ul, .tocify li {
+    line-height: 18px;
+}
+
+.tocify-subheader .tocify-item {
+    font-size: 0.90em;
+    line-height: 16px;
+}
+
+.tocify .list-group-item {
+    border-radius: 0px;
+}
+
+.tocify {
+    width: 25%;
+    max-height: 90%;
+    overflow: auto;
+    margin-left: 2%;
+    position: fixed;
+    border: 0px solid #ccc; 
+    border-radius: 0px; 
+}
+
+.tocify ul, .tocify li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.tocify-subheader {
+    margin-left: .5rem !important;
+    display: none;
+}
+
+.tocify-subheader li {
+    font-size: 12px;
+}
+
+.tocify-subheader .tocify-subheader {
+    text-indent: 30px;
+}
+.tocify-subheader .tocify-subheader .tocify-subheader {
+    text-indent: 40px;
+}
+.tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader {
+    text-indent: 50px;
+}
+.tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader {
+    text-indent: 60px;
+}
+
+.tocify .tocify-item > a, .tocify .nav-list .nav-header {
+    margin: 0px;
+}
+
+.tocify .tocify-item a, .tocify .list-group-item {
+    padding: 5px;
+}
+
+.tocify .nav-pills > li {
+    float: none;
+}
+
+.tocify .list-group-item.active {
+    background-color: #0370B7;
+    border-color: #0370B7;
+  }
+
+  
+</style>
+  
+$endif$
+
+$endif$
+
+<!-- /* font and styling for Cville Equity Atlas */ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500&family=Poppins:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://virginiaequitycenter.github.io/cville-equity-atlas/assets/css/styles.css">
+
+<style>
+  .breadcrumb-container {
+  background-color: #ffffff;
+  margin-top: 15px;
+}
+</style>
+
+</head>
+
+<body class="report">
+  <a href="#maincontent" class="visually-hidden focusable skip-link">
+    Skip to main content
+  </a>
+
+<header class="nav" style="position:relative;height:50px;">
+    <nav class="navbar navbar-expand-md" role="navigation" aria-label="main navigation" style="background-color: #ebeef2;">
+        <div class="nav-main">
+            <a class="home-page" href="https://virginiaequitycenter.github.io/cville-equity-atlas" title="Charlottesville Regional Equity Atlas">
+                <span style="color:#3991D1">Charlottesville&nbsp;</span><span style="color:#052F5F">Equity Atlas</span>
+            </a>
+        </div>
+    </nav>
+</header>
+
+$if(theme)$
+<header id="$idprefix$header" class="module">
+
+$if(code_menu)$
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+$if(code_folding)$
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+$if(source_embed)$
+<li role="separator" class="divider"></li>
+$endif$
+$endif$
+$if(source_embed)$
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+$endif$
+</ul>
+</div>
+$endif$
+
+$endif$
+
+$if(theme)$
+</header>
+$endif$
+
+<article class="report-content">
+
+<!-- Include Navigation breadcrumb -->
+<nav id="breadcrumbs" class="breadcrumb-container">
+    <div class="breadcrumbs" style="margin-bottom: -25px;">
+      <a href="https://virginiaequitycenter.github.io/cville-equity-atlas/reports/">Reports</a> 
+        $if(title)$
+        / $title$
+        $endif$
+        <hr>
+    </div>
+</nav>
+
+<div id="maincontent" class="main-container">
+
+<div class="rmd-main">
+
+$if(toc_float)$
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row flex-wrap-reverse">
+
+<div class="toc-content col-sm-12 col-md-9 col-lg-9">
+
+$endif$
+
+$for(include-before)$
+$include-before$
+$endfor$
+  
+<header class="rmd-header">
+  $if(title)$
+<h1 class="title toc-ignore">$title$</h1>
+$if(subtitle)$
+<h2 class="subtitle  toc-ignore">$subtitle$</h2>
+$endif$
+
+<!-- Image and Caption options -->
+
+<img src="https://raw.githubusercontent.com/virginiaequitycenter/Cville-Heat/main/sun_skyseeker_wide.jpg", alt="Image of bright sun in an orange sky">
+
+<small style="font-style: italic;text-align: right;display: block;">Image of Sun by <a href="https://www.flickr.com/photos/skyseeker/45962658/in/photostream/">skyseeker on flickr</a></small>
+
+
+
+$for(author)$
+$if(author.name)$
+<h3 class="author">$author.name$</h3>
+$if(author.affiliation)$
+<address class="author_afil">
+$author.affiliation$<br>$endif$
+$if(author.email)$
+<a class="author_email" href="mailto:#">$author.email$</a>
+</address>
+$endif$
+$else$
+<h3 class="author">$author$</h3>
+$endif$
+$endfor$
+$if(date)$
+<h3 class="date">$date$</h3>
+$endif$
+$if(abstract)$
+<div class="abstract">
+<p class="abstract">Abstract</p>
+$abstract$
+</div>
+$endif$
+$endif$
+
+<hr>
+</header>
+
+$if(toc_float)$
+
+<div class="toc-mobile">
+$if(toc-title)$
+<h2 id="$idprefix$toc-title" class="toc-ignore">$toc-title$</h2>
+$else$
+<h2 id="$idprefix$toc-title" class="toc-ignore">Contents</h2>
+$endif$
+$toc$
+<hr>
+</div>
+
+$else$
+$if(toc)$
+<div id="$idprefix$TOC">
+  $if(toc-title)$
+  <h2 id="$idprefix$toc-title" class="toc-ignore">$toc-title$</h2>
+  $else$
+  <h2 id="$idprefix$toc-title" class="toc-ignore">Contents</h2>
+  $endif$
+$toc$
+<hr>
+</div>
+$endif$
+$endif$
+
+$body$
+
+$for(include-after)$
+$include-after$
+$endfor$
+
+$if(theme)$
+
+$if(toc_float)$
+</div>
+
+<div class="col-sm-12 col-md-3 col-lg-3">
+
+<div id="$idprefix$TOC" class="tocify">
+  $if(toc-title)$
+  <h2 id="$idprefix$toc-title" class="toc-ignore">$toc-title$</h2>
+  $else$
+  <h2 id="$idprefix$toc-title" class="toc-ignore">Contents</h2>
+  $endif$
+</div>
+</div>
+
+</div>
+$endif$
+
+</div>
+
+</div> 
+
+
+
+
+$endif$
+
+
+</article>
+
+ <footer>
+    <div class="footer-wrapper">
+        <section class="footer-menu">
+            <nav>
+                
+                <ul class="footer-nav">
+                  
+                  <li>
+                        <a href="https://virginiaequitycenter.github.io/cville-equity-atlas/" target="_top">
+                            Home
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://virginiaequitycenter.github.io/cville-equity-atlas/dashboards/" target="_top">
+                            Dashboards
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://virginiaequitycenter.github.io/cville-equity-atlas/reports/" target="_top">
+                            Reports
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://virginiaequitycenter.github.io/cville-equity-atlas/resources/" target="_top">
+                            Resources
+                        </a>
+                    </li>
+
+                </ul>
+                
+            </nav>
+        </section>
+         <section class="footer-contact">
+            <a class="footer-link" href="https://communitypartnerships.virginia.edu" target="_blank">
+                <img src="https://virginiaequitycenter.github.io/cville-equity-atlas/assets/img/uva-ccp-horizontal-formal.png" width="320" class="footer-logo" alt="The Center for Community Partnerships">
+            </a>
+        </section>
+    </div>
+</footer>
+
+
+
+
+
+<!-- tabsets -->
+
+<script>
+$$(document).ready(function () {
+  window.buildTabsets("$idprefix$TOC");
+});
+
+$$(document).ready(function () {
+  $$('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $$(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+
+<!-- code folding -->
+$if(code_menu)$
+<script>
+$$(document).ready(function () {
+$if(source_embed)$
+  window.initializeSourceEmbed("$source_embed$");
+$endif$
+$if(code_folding)$
+  window.initializeCodeFolding("$code_folding$" === "show");
+$endif$
+});
+</script>
+$endif$
+
+$if(toc_float)$
+<script>
+$$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $$('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $$('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "$toc_selectors$",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+$if(toc_collapsed)$
+    options.showAndHide = true;
+$else$
+    options.showAndHide = false;
+$endif$
+$if(toc_smooth_scroll)$
+    options.smoothScroll = true;
+$else$
+    options.smoothScroll = false;
+$endif$
+
+    // tocify
+    var toc = $$("#$idprefix$TOC").tocify(options).data("toc-tocify");
+});
+</script>
+$endif$
+
+$if(mathjax-url)$
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "$mathjax-url$";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+$endif$
+
+</body>
+</html>
