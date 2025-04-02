@@ -1,5 +1,6 @@
 ---
 title: "Charlottesville Urban Heat Islands"
+description: Exploring the impact of rising temperatures and tree canopy on Charlottesville neighborhoods.
 output: 
   html_document:
     template: external-rmd-template.html

@@ -1,0 +1,610 @@
+---
+title: "Map Testing & Report Planning"
+author: "Lee LeBoeuf, Beth Mitchell"
+date: '2023-10-10'
+output: html_document
+---
+```{css, echo=FALSE}
+.main-container.container-fluid {
+max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 4.167%;
+}
+
+div.leafletsync div {
+  border-color: #FFFFFF !important;
+}
+.info.legend.leaflet-control {
+  transform: scale(.9);
+  margin-bottom: 0;
+  margin-right: 5px;
+}
+
+.info.legend.leaflet-control h4.title {
+  font-size: 18px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.leaflet-container .leaflet-control-attribution{
+  font-size: 10px;
+}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(leaflet)
+library(tidyverse)
+library(leafem)
+library(sf)
+library(psych)
+library(plotly)
+library(beeswarm)
+library(ggpubr)
+library(leafsync)
+library(htmltools)
+library(sf)
+library(biscale)
+
+# reading in the data
+
+dat <- readRDS("Data/cvillheat_blocks.RDS")
+dat <- st_transform(dat, crs = 4326)
+bbox <- st_bbox(dat$geometry) %>% as.vector()
+
+neighbor_asses <- st_read("Data/Assessment_Neighborhoods")
+neighbor_asses <- st_transform(neighbor_asses, crs = 4326)
+
+neighbor_shape <- st_read("Data/Planning_Neighborhood_Area")
+neighbor_shape<- st_transform(neighbor_shape, crs = 4326)
+neighbor_shape <- neighbor_shape %>% select(OBJECTID, NAME, geometry)
+
+# neigh <- read.csv("Data/Assessment_Neighborhoods.csv")
+
+intersect <- st_intersects(dat$geometry, neighbor_shape$geometry)
+
+test <- st_join(dat, neighbor_shape, st_intersects)
+test <- test %>% 
+  mutate(neighborhood = 'neighborhood') %>% 
+  select(-c(OBJECTID))
+
+test1 <- test %>% 
+  pivot_wider(names_from = "neighborhood", values_from = "NAME.y", names_sep = ",")
+
+# dat <- test %>% 
+#   pivot_wider(names_from = "neighborhood", values_from = "NAME.y", names_sep = ",")
+
+
+
+temp_am <- dat %>% 
+  select(am_t_f) %>% 
+  mutate(temp = am_t_f) %>% 
+  select(temp) %>% 
+  st_drop_geometry()
+
+temp_af <- dat %>% 
+  select(af_t_f) %>% 
+  mutate(temp = af_t_f) %>% 
+  select(temp) %>% 
+  st_drop_geometry()
+
+temp_pm <- dat %>% 
+  select(pm_t_f) %>% 
+  mutate(temp = pm_t_f) %>% 
+  select(temp) %>% 
+  st_drop_geometry()
+
+temp_range <- temp_am %>% 
+  rbind(temp_af) %>% 
+  rbind(temp_pm)
+
+temp_select <- temp_pm$temp
+
+pal_all <- colorNumeric("Spectral", domain = temp_range$temp, reverse = T)
+pal_all_rev <- colorNumeric("Spectral", domain = temp_range$temp, reverse = F)
+
+pal_pm <- colorNumeric("YlOrRd", domain = temp_select, reverse = F)
+pal_pm_rev <- colorNumeric("YlOrRd", domain = temp_select, reverse = T)
+
+```
+
+As many scientists predicted, we are already experiencing the beginning effects of climate change. Already, we see evidence that these effects [disproportionality impact low-income countries](https://www.theguardian.com/global-development/2022/jan/14/worlds-poorest-bear-brunt-of-climate-crisis-10-underreported-emergencies) and low-income communities in the [United States](https://www.npr.org/2021/07/14/1015983700/extreme-heat-is-getting-worse-for-low-income-non-white-americans-a-new-study-sho). In urban areas in the United States, [rising temperatures are most felt by low-income families](https://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-mosthttps://www.npr.org/2019/09/03/754044732/as-rising-heat-bakes-u-s-cities-the-poor-often-feel-it-most) who tend to be concentrated in residential areas with high amounts of concrete and low amounts of green space. 
+
+These temperature disparities will further exacerbate disparities in housing costs ([like air conditioning](https://journals.sagepub.com/doi/10.1177/0956247816655676)) and [health outcomes](https://www.epa.gov/heatislands/heat-island-impacts). 
+
+Below, we map temperature readings across the city along with demographic information to see which communities of people in Charlottesville will be most impacted by urban heat island effects. These maps show the average temperature for each census block in the City from a series of temperature readings around the city on August 24th, 2021. These data were intentionally collected on a day that is typically hot with low levels of precipitation. Our maps show the temperatures by [census blocks](https://www2.census.gov/geo/pdfs/reference/GARM/Ch11GARM.pdf), which are the smallest geographical unit used by the U.S. Census. 
+
+For more information about the data, visit the [City of Charlottesville Open Data Portal](https://opendata.charlottesville.org/datasets/charlottesville::urban-heat-data-2021-morning-traverse/about). 
+
+### Temperature Fluctuations on August, 24th 2021
+
+Obviously, outside temperatures are not consistent across an entire day. Urban heat islands form when heat gets trapped in concrete and other industrial material, so the gradual increases in temperature you would expect to see the longer the sun is out is amplified.
+
+The maps below temperature readings around the City of Charlottesville in the morning, afternoon, and evening from the same day. As one would expect, temperatures are lowest in the morning, peak in the afternoon, and then begin to decline in the evening. However, the progression of temperatures throughout the day highlights how concrete-heavy areas trap heat while spaces with more greenery manage to regulate and cool the temperature. By the evening, there are obvious disparities in the temperature between areas that cooled significantly and those that did not. The larger disparities in the evening also coincide with the hours when families are more likely to be home and feel the differences--in the evening after work.  
+
+<div class="leafletsync">
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+am_title <- h4("Morning temperatures", class = "title")
+
+m_am <- leaflet() %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+  addPolygons(data = dat,
+              fillColor = ~pal_all(dat$am_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_all(dat$am_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
+                             "Average temperature: ", round(dat$am_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", 
+                     pal = pal_all_rev, 
+                     values = temp_range$temp, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+   addControl(am_title, position = "topright")
+
+af_title <- h4("Afternoon temperatures", class = "title")
+
+m_af <- leaflet() %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+  addPolygons(data = dat,
+              fillColor = ~pal_all(dat$af_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_all(dat$af_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
+                             "Average temperature: ", round(dat$af_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", 
+                     pal = pal_all_rev, 
+                     values = temp_range$temp, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+   addControl(af_title, position = "topright")
+
+pm_title <- h4("Evening temperatures", class = "title")
+
+m_pm <- leaflet() %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+  addPolygons(data = dat,
+              fillColor = ~pal_all(dat$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_all(dat$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
+                             "Average temperature: ", round(dat$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", 
+                     pal = pal_all_rev, 
+                     values = temp_range$temp, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+   addControl(pm_title, position = "topright")
+
+
+sync(list(m_am, m_af, m_pm), ncol = 3)
+```
+</div>
+
+### Tree Canopy and Cooling
+
+While concrete traps heat, green spaces have a meaningful cooling effect. As shown in the map below, temperatures are highest in the evening in areas that have the highest amount of concrete surface areas---areas like the downtown mall or near Barrack's Shopping Center. The areas that have the densest tree coverage or tree canopy tend to be much cooler. Drag the center line below to the right and left sides of the map to see where temperatures are highest or where tree canopy is densest. As you can see, the downtown area and main street are much hotter than areas close to parks and neighborhoods with more green space.
+
+__Note:__ The legend and scale for the following maps is slightly different than the maps already shown. Since we are only looking at the evening temperatures, which do not exceed 90 degrees, the scale ends at 90 instead of 95 like the first set of maps. We made this change to make seeing differences in temperature easier. 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+library(leaflet.extras2)
+tree <- readRDS("Data/cvilltree_blocks.RDS")
+
+pal_tree <- colorNumeric("Greens", domain = tree$Histogram, reverse = F)
+pal_tree_rev <- colorNumeric("Greens", domain = tree$Histogram, reverse = T)
+
+# leaflet() %>% 
+#   addMapPane("left", zIndex = 0) %>%
+#   addMapPane("right", zIndex = 0) %>%
+#   # addTiles(group = "base", layerId = "baseid",
+#                # options = pathOptions(pane = "right")) %>%
+#   addProviderTiles("CartoDB.Positron") %>% 
+#   addPolygons(data = tree_extract_blocks,
+#               fillColor = ~pal_tree(tree_extract_blocks$Histogram),
+#               weight = 1,
+#               opacity = 1,
+#               color = "white", 
+#               fillOpacity = 0.6,
+#               highlight = highlightOptions(
+#                 weight = 2,
+#                 fillOpacity = 0.8,
+#                 bringToFront = T),
+#               popup = paste0("GEOID: ", tree_extract_blocks$GEOID20, "<br>",
+#                              "Tree Canopy: ", round(tree_extract_blocks$Histogram),"%")) %>% 
+#   leaflet::addLegend("bottomright", pal = pal_tree_rev, values = (tree_extract_blocks$Histogram), opacity = 0.7) %>%
+#       addSidebyside(layerId = "sidecontrols",
+#                     rightId = "baseid",
+#                     leftId = "opencycle")
+
+tree_title <- h4("Tree Canopy", class = "title")
+temp_title <- h4("Afternoon temperatures", class = "title")
+
+leaflet() %>%
+  leaflet(width = "100%", height = "900px") %>%
+      addMapPane("left", zIndex = 0) %>%
+      addMapPane("right", zIndex = 0) %>%
+      addMapPane('neighBoundaries', zIndex = 410) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       group="base", layerId = "baseid",
+                       options = pathOptions(pane = "right")) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       group="carto", layerId = "cartoid",
+                       options = pathOptions(pane = "left")) %>%
+   
+      fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+      addPolygons(data = dat,
+              fillColor = ~pal_pm(dat$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_pm(dat$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
+                             "Average temperature: ", round(dat$pm_t_f, 2)),
+                       options = pathOptions(pane = "left")) %>%
+      leaflet::addLegend("bottomleft", 
+                     title = paste0("Afternoon","<br>", "temperatures"),
+                     pal = pal_pm_rev, 
+                     values = temp_select, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+  addPolygons(data = tree,
+              fillColor = ~pal_tree(tree$Histogram),
+              weight = 1,
+              opacity = 1,
+              color = "white", 
+              fillOpacity = 0.6,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.8,
+                bringToFront = T),
+              popup = paste0("GEOID: ", tree$GEOID20, "<br>",
+                             "Tree Canopy: ", round(tree$Histogram),"%"),
+              options = pathOptions(pane = "right")) %>%
+  addPolygons(data= neighbor_shape, color = "blue",
+                    fill = FALSE,
+                    weight = 1.5,
+                    group = 'Neighborhood Boundaries',
+                    options = pathOptions(pane = 'neighBoundaries')) %>%
+  addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
+                         options = layersControlOptions(collapsed = FALSE),
+                         position = "topright") %>%
+  leaflet::addLegend("bottomright", 
+                     title = "Tree Canopy",
+                     pal = pal_tree_rev, 
+                     values = (tree$Histogram), 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "%")) %>%
+      addSidebyside(layerId = "sidecontrols",
+                    rightId = "baseid",
+                    leftId = "opencycle")
+
+
+
+
+```
+
+### Filtered maps 
+
+These maps provide a nice global view of the city, but to make it easier to understand the impact on specific communities, below we show the same maps but only with blocks that meet a certain threshold of racial composition. In each map, we've filtered the data to only show census blocks whose percent population of each racial group is above average for all the blocks in the area. As a whole, [according to the 2020 Census](https://www.census.gov/quickfacts/fact/table/charlottesvillecityvirginia/RTN130217), roughly 69.7% of Charlottesville is White, 18% is Black, and 5.7% is Hispanic. However, do to longstanding neighborhood segregation resulting from racial wealth/income disparities and other zoning policies, those populations are not evenly distributed around the city. In other words, although the city as a whole is 69.7% White, 18% Black, and 5.7% Hispanic, any given census block might be 10% White, 90% Black, and 20% Hispanic. So, we took the average percent of each race across all census blocks, and the maps below only show the blocks that fell above the average for each race.
+
+Multiple factors have contributed to the concentration of certain racial groups throughout the City of Charlottesville across time, all of which have primarily focused on the segregation of White and Black residents. These efforts include [racial covenants](https://mappingcville.com/2019/01/28/1903-1948-charlottesvilles-first-racially-restrictive-covenants/) that restricted the sale of White-owned property to Black residents and the [selective expansion of the University of Virginia](https://news.virginia.edu/content/uva-and-history-race-property-and-power) forcing historically Black neighborhoods to disperse. As a result of the City's history of segregation, the disparities shown below are most obvious between White and Black residents, while Hispanic residents seem to be slightly more evenly distributed throughout the city. 
+
+<div class="leafletsync">
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+all_title <-  h4("All blocks", class = "title")
+
+mapall <- leaflet() %>% 
+  leaflet(height = "500px") %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+  addMapPane('neighBoundaries', zIndex = 410) %>%
+    addPolygons(data= neighbor_shape, color = "blue",
+                    fill = FALSE,
+                    weight = 1.5,
+                    group = 'Neighborhood Boundaries',
+                    options = pathOptions(pane = 'neighBoundaries')) %>%
+  addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
+                         options = layersControlOptions(collapsed = FALSE),
+                         position = "bottomright") %>%
+  addPolygons(data = dat,
+              fillColor = ~pal_pm(dat$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_pm(dat$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", dat$GEOID20, "<br>",
+                             "Neighborhood: ", dat$neighborhood, "<br>",
+                             "Average temperature: ", round(dat$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", 
+                     pal = pal_pm_rev, 
+                     values = temp_select, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+   addControl(all_title, position = "topright")
+
+black_title <- h4("Black residents", class = "title")
+
+filmap1 <- dat %>%
+  dplyr::filter(percBlack >= mean(percBlack, na.rm = T))
+
+mapblack <- leaflet() %>% 
+  leaflet(height = "500px") %>% 
+  addProviderTiles("CartoDB.Voyager") %>%
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+  addMapPane('neighBoundaries', zIndex = 410) %>%
+    addMapPane('neighBoundaries', zIndex = 410) %>%
+    addPolygons(data= neighbor_shape, color = "blue",
+                    fill = FALSE,
+                    weight = 1.5,
+                    group = 'Neighborhood Boundaries',
+                    options = pathOptions(pane = 'neighBoundaries')) %>%
+  addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
+                         options = layersControlOptions(collapsed = FALSE),
+                         position = "bottomright") %>%
+  hideGroup("Neighborhood Boundaries") %>% 
+  addPolygons(data = filmap1,
+              fillColor = ~pal_pm(filmap1$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_pm(filmap1$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", filmap1$GEOID20, "<br>",
+                             "Neighborhood: ", filmap1$neighborhood, "<br>",
+                             "Average temperature: ", round(filmap1$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", 
+                     pal = pal_pm_rev, 
+                     values = temp_select, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+   addControl(black_title, position = "topright")
+
+
+white_title <- h4("White residents", class = "title")
+
+filmap2 <- dat %>%
+  filter(percWhite >= mean(percWhite, na.rm = T))
+
+mapwhite <- leaflet() %>% 
+  leaflet(height = "500px") %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+  addMapPane('neighBoundaries', zIndex = 410) %>%
+  addMapPane('neighBoundaries', zIndex = 410) %>%
+  addPolygons(data= neighbor_shape, color = "blue",
+                    fill = FALSE,
+                    weight = 1.5,
+                    group = 'Neighborhood Boundaries',
+                    options = pathOptions(pane = 'neighBoundaries')) %>%
+  addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
+                         options = layersControlOptions(collapsed = FALSE),
+                         position = "bottomright") %>%
+  hideGroup("Neighborhood Boundaries") %>% 
+  addPolygons(data = filmap2,
+              fillColor = ~pal_pm(filmap2$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_pm(filmap2$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", filmap2$GEOID20, "<br>",
+                             "Neighborhood: ", filmap2$neighborhood, "<br>",
+                             "Average temperature: ", round(filmap2$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", 
+                     pal = pal_pm_rev, 
+                     values = temp_select, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+   addControl(white_title, position = "topright")
+
+hisp_title <- h4("Hispanic residents", class = "title")
+
+filmap3 <- dat %>%
+  filter(percHisp >= mean(percHisp, na.rm = T))
+
+maphisp <- leaflet() %>% 
+  leaflet(height = "500px") %>% 
+  addProviderTiles("CartoDB.Voyager") %>% 
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4]) %>%
+  addMapPane('neighBoundaries', zIndex = 410) %>%
+  addMapPane('neighBoundaries', zIndex = 410) %>%
+  addPolygons(data= neighbor_shape, color = "blue",
+                    fill = FALSE,
+                    weight = 1.5,
+                    group = 'Neighborhood Boundaries',
+                    options = pathOptions(pane = 'neighBoundaries')) %>%
+  addLayersControl(overlayGroups = c("Neighborhood Boundaries"),
+                         options = layersControlOptions(collapsed = FALSE),
+                         position = "bottomright") %>%
+  hideGroup("Neighborhood Boundaries") %>% 
+  addPolygons(data = filmap3,
+              fillColor = ~pal_pm(filmap3$pm_t_f),
+              weight = 1,
+              opacity = 1,
+              color = ~pal_pm(filmap3$pm_t_f), 
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 2,
+                fillOpacity = 0.9,
+                bringToFront = T),
+              popup = paste0("GEOID: ", filmap3$GEOID20, "<br>",
+                             "Neighborhood: ", filmap3$neighborhood, "<br>",
+                             "Average temperature: ", round(filmap3$pm_t_f, 2))) %>% 
+  leaflet::addLegend("bottomright", 
+                     pal = pal_pm_rev, 
+                     values = temp_select, 
+                     opacity = 0.7, 
+                     labFormat = labelFormat(transform = function(x) sort(x, decreasing = TRUE), suffix = "°")) %>%
+   addControl(hisp_title, position = "topright")
+
+sync(list(mapblack, mapwhite, maphisp, mapall), ncol = 2)
+```
+</div>
+
+### Scatterplot
+
+The scatterplots below show the relationship between temperature and the percent of residents in each block who identify as Black, Hispanic, or White. Each point represents a block. Where that point falls on the x-axis indicates the percent of residents who identify as each racial/ethnic group, and where that point falls on the y-axis indicates the average evening temperature for the group. The blue lines show the direction of the overall trend. As you can see, as the percent of Black and Hispanic residents in each block increases, so does the average temperature of the block, but we see the opposite trend for White residents. In other words, relatively warmer blocks are more likely to have a higher percentage of Black and Hispanic residents and a lower percentage of White residents. 
+
+* Add explanation of what a correlation is. 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE, fig.width = 10}
+
+temp_limits <- c(min(dat$pm_t_f), max(dat$pm_t_f))
+
+black <- ggplot(dat, aes(x=percBlack, y=pm_t_f, color = pm_t_f)) +
+  geom_point(size=2) +
+  scale_color_distiller(palette = "YlOrRd",
+                        limits = temp_limits,
+                        direction = 1) +
+  geom_smooth(method=lm, se=FALSE) +
+  xlab("Percent Black Residents") + ylab("Evening Temperature") + theme_minimal() + annotate("text", x = 60, y = 85, label = paste0("Correlation: ", round(cor.test(dat$pm_t_f, dat$percBlack)$estimate, 2)))
+
+hispanic <- ggplot(dat, aes(x=percHisp, y=pm_t_f, color = pm_t_f)) +
+  geom_point(size=2) +
+  scale_color_distiller(palette = "YlOrRd",
+                        limits = temp_limits,
+                        direction = 1) +
+  geom_smooth(method=lm, se=FALSE) +
+  xlab("Percent Hispanic Residents") + ylab("Evening Temperature") + theme_minimal() + annotate("text", x = 60, y = 85, label = paste0("Correlation: ", round(cor.test(dat$pm_t_f, dat$percHisp)$estimate, 2)))
+
+white <- ggplot(dat, aes(x=percWhite, y=pm_t_f, color = pm_t_f)) +
+  geom_point(size=2) +
+  scale_color_distiller(palette = "YlOrRd",
+                        limits = temp_limits,
+                        direction = 1) +
+  geom_smooth(method=lm, se=FALSE) +
+  xlab("Percent White Residents") + ylab("Evening Temperature") + theme_minimal() + annotate("text", x = 60, y = 85, label = paste0("Correlation: ", round(cor.test(dat$pm_t_f, dat$percWhite)$estimate, 2)))
+
+ggarrange(black, hispanic, white, nrow = 1, common.legend = TRUE)
+
+```
+
+### Demographics and Tree Canopy 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+# need to have demo and tree data in one dataframe 
+dat <- dat %>%
+  st_drop_geometry()
+
+dat <- dat %>%
+  left_join(tree[,c("GEOID20", "Histogram")])
+
+# splitting into groups based on demographics
+dat$Blacktile <- ntile(dat$percBlack, 4) 
+dat$Blacktile <- as.factor(dat$Blacktile)
+
+dat$Whitetile <- ntile(dat$percWhite, 4) 
+dat$Whitetile <- as.factor(dat$Whitetile)
+
+dat$Hisptile <- ntile(dat$percHisp, 4) 
+dat$Hisptile <- as.factor(dat$Hisptile)
+
+# Black residents 
+bdat <- dat %>% 
+  group_by(Blacktile) %>% 
+  mutate(Tree = mean(Histogram, na.rm = T)) %>% slice(1)
+
+b <- ggplot(bdat, aes(x = Blacktile, y = Tree,
+                            fill = Blacktile, label = Tree,
+                                  text = paste0('Mean', ': ', round(Tree, digits = 2)))) +
+  geom_bar(stat = 'identity') +
+  scale_fill_manual(values = c('#dfb0d6', '#a5add3', '#569ab9', "cornflowerblue")) +
+  labs(x = bdat$Blacktile,
+       y = bdat$Tree) +
+        labs(x = "Percent Black Residents Rank",
+             y = "Average Tree Canopy") +
+        theme_minimal() + ggtitle("Average Tree Canopy and Percent Black Residents") + geom_hline(yintercept = mean(dat$Histogram, na.rm = T), linetype = 'dashed', color = 'black', size = 1) + annotate("text", x = 4, y = (mean(dat$Histogram, na.rm = T) + 2), label = paste0("Overall Average: ", round(mean(dat$Histogram, na.rm = T), 2)))
+
+ggplotly(b, tooltip = c('text')) %>%
+        layout(showlegend = FALSE, yaxis = list(side = "right", fixedrange = T), xaxis = list(fixedrange = T))
+
+# White residents 
+
+wdat <- dat %>% 
+  group_by(Whitetile) %>% 
+  mutate(Tree = mean(Histogram, na.rm = T)) %>% slice(1)
+
+w <- ggplot(wdat, aes(x = Whitetile, y = Tree,
+                            fill = Whitetile, label = Tree,
+                                  text = paste0('Mean', ': ', round(Tree, digits = 2)))) +
+  geom_bar(stat = 'identity') +
+  scale_fill_manual(values = c('#dfb0d6', '#a5add3', '#569ab9', "cornflowerblue")) +
+  labs(x = wdat$Whitetile,
+       y = wdat$Tree) +
+        labs(x = "Percent White Residents Rank",
+             y = "Average Tree Canopy") +
+        theme_minimal() + ggtitle("Average Tree Canopy and Percent White Residents") + geom_hline(yintercept = mean(dat$Histogram, na.rm = T), linetype = 'dashed', color = 'black', size = 1) + annotate("text", x = 4, y = (mean(dat$Histogram, na.rm = T) + 2), label = paste0("Overall Average: ", round(mean(dat$Histogram, na.rm = T), 2)))
+
+ggplotly(w, tooltip = c('text')) %>%
+        layout(showlegend = FALSE, yaxis = list(side = "right", fixedrange = T), xaxis = list(fixedrange = T))
+
+# Hispanic residents 
+
+hdat <- dat %>% 
+  group_by(Hisptile) %>% 
+  mutate(Tree = mean(Histogram, na.rm = T)) %>% slice(1)
+
+h <- ggplot(hdat, aes(x = Hisptile, y = Tree,
+                            fill = Hisptile, label = Tree,
+                                  text = paste0('Mean', ': ', round(Tree, digits = 2)))) +
+  geom_bar(stat = 'identity') +
+  scale_fill_manual(values = c('#dfb0d6', '#a5add3', '#569ab9', "cornflowerblue")) +
+  labs(x = hdat$Hisptile,
+       y = hdat$Tree) +
+        labs(x = "Percent Hispanic Residents Rank",
+             y = "Average Tree Canopy") +
+        theme_minimal() + ggtitle("Average Tree Canopy and Percent Hispanic Residents") + geom_hline(yintercept = mean(dat$Histogram, na.rm = T), linetype = 'dashed', color = 'black', size = 1) + annotate("text", x = 4, y = (mean(dat$Histogram, na.rm = T) + 2), label = paste0("Overall Average: ", round(mean(dat$Histogram, na.rm = T), 2)))
+
+ggplotly(h, tooltip = c('text')) %>%
+        layout(showlegend = FALSE, yaxis = list(side = "right", fixedrange = T), xaxis = list(fixedrange = T))
+```
+
+
+
+
+
+
+

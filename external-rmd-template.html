@@ -14,7 +14,9 @@
 <meta property="og:title" content="$pagetitle$">
 <meta property="og:type" content="article">
 <meta property="og:image" content="https://raw.githubusercontent.com/virginiaequitycenter/cville-equity-atlas/refs/heads/main/assets/img/atlas-image-card.png">
+<meta property="og:image:secure_url" content="https://raw.githubusercontent.com/virginiaequitycenter/cville-equity-atlas/refs/heads/main/assets/img/atlas-image-card.png">
 <meta property="og:image:type" content="image/jpg">
+
 
 $if(theme)$
 $else$
@@ -30,6 +32,14 @@ $if(date-meta)$
 $endif$
 
 <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
+
+$if(description)$
+<meta name="description" content="$description-meta$">
+<meta property="og:description" content="$description-meta$">
+$else$
+<meta name="description" content="Regional data tools and reports that enable data-informed advocacy to support community building and collective action for change.">
+<meta property="og:description" content="Regional data tools and reports that enable data-informed advocacy to support community building and collective action for change.">
+$endif$
 
 <link rel="shortcut icon" type="image/png" sizes="32x32" href="https://virginiaequitycenter.github.io/cville-equity-atlas/assets/img/ec-icon.png"/>
 
