@@ -1,10 +1,11 @@
 ---
 title: "Charlottesville Urban Heat Islands"
-description: Exploring the impact of rising temperatures and tree canopy on Charlottesville neighborhoods.
+date: "Published January 2024"
 output: 
   html_document:
     template: external-rmd-template.html
 ---
+
 ```{css, echo=FALSE}
 /*.main-container {
   max-width: 1000px !important;
